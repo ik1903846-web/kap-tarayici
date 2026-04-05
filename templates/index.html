@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAP Finansal Tarayıcı</title>
+<style>
+:root{--blue:#1a56db;--blue-dk:#1035a0;--blue-lt:#e8f0fe;--gray:#6b7280;--border:#e5e7eb;--bg:#f9fafb;--white:#ffffff;--text:#111827;--green:#059669;--red:#dc2626}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:linear-gradient(135deg,#0f2d6e,#1a56db);color:white;padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar-logo{font-size:22px;font-weight:800}
+.topbar-logo span{color:#93c5fd}
+.stat-pill{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600}
+.topbar-sub{font-size:12px;color:#93c5fd;margin-left:auto}
+.layout{display:flex;height:calc(100vh - 56px);overflow:hidden}
+.sidebar{width:320px;min-width:260px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-search{padding:12px;border-bottom:1px solid var(--border)}
+.sidebar-search input{width:100%;padding:9px 14px;border-radius:8px;border:1px solid var(--border);font-size:14px;outline:none}
+.sidebar-search input:focus{border-color:var(--blue)}
+.sidebar-count{padding:6px 14px;font-size:11px;color:var(--gray);background:var(--bg);border-bottom:1px solid var(--border)}
+.company-list{overflow-y:auto;flex:1}
+.company-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.company-item:hover{background:var(--blue-lt)}
+.company-item.active{background:var(--blue-lt);border-left:3px solid var(--blue)}
+.badge{background:#1e3a8a;color:white;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;min-width:44px;text-align:center}
+.company-name{font-size:13px;flex:1}
+.company-years{font-size:11px;color:var(--gray)}
+.main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--gray);text-align:center}
+.welcome-icon{font-size:64px}
+.welcome h2{font-size:22px;color:var(--text)}
+.welcome p{font-size:14px;max-width:360px;line-height:1.6}
+.company-header{background:linear-gradient(135deg,#0f2d6e,#1a56db);color:white;border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.company-header-code{background:rgba(255,255,255,.2);border-radius:10px;padding:8px 16px;font-size:24px;font-weight:800}
+.company-header-info h2{font-size:18px;font-weight:700}
+.company-header-info p{font-size:12px;color:#93c5fd;margin-top:4px}
+.download-btns{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;gap:6px;transition:transform .15s,opacity .15s;text-decoration:none}
+.btn:hover{transform:translateY(-1px);opacity:.9}
+.btn-excel{background:#16a34a;color:white}
+.btn-word{background:#1d4ed8;color:white}
+.btn-kap{background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.4)}
+.tabs{display:flex;gap:4px;background:var(--white);border-radius:10px;padding:4px;border:1px solid var(--border);flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);transition:all .2s;border:none;background:none}
+.tab.active{background:var(--blue);color:white}
+.tab:hover:not(.active){background:var(--blue-lt);color:var(--blue)}
+.table-card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.table-card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--blue-dk);display:flex;align-items:center;gap:8px}
+.financial-table{width:100%;border-collapse:collapse;font-size:13px}
+.financial-table thead tr{background:#1a56db;color:white}
+.financial-table thead th{padding:10px 14px;font-weight:600;text-align:right}
+.financial-table thead th:first-child{text-align:left;min-width:220px}
+.financial-table tbody tr:nth-child(even){background:#f8fafc}
+.financial-table tbody tr:hover{background:var(--blue-lt)}
+.financial-table tbody td{padding:9px 14px;border-bottom:1px solid var(--border)}
+.financial-table tbody td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.val-pos{color:var(--green)}
+.val-neg{color:var(--red)}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:14px;color:var(--gray)}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.no-data{padding:40px;text-align:center;color:var(--gray);font-size:14px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">KAP <span>Finansal</span></div>
+  <div class="stat-pill" id="stat-companies">⏳ Yükleniyor...</div>
+  <div class="stat-pill" id="stat-records">...</div>
+  <div class="topbar-sub" id="stat-updated"></div>
+</div>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-search">
+      <input type="text" id="search" placeholder="🔍 Hisse kodu veya şirket ara..." oninput="filterCompanies()">
+    </div>
+    <div class="sidebar-count" id="list-count">Yükleniyor...</div>
+    <div class="company-list" id="company-list"></div>
+  </aside>
+  <main class="main" id="main">
+    <div class="welcome">
+      <div class="welcome-icon">📊</div>
+      <h2>KAP Finansal Veri Tarayıcısı</h2>
+      <p>Soldaki listeden bir hisse seçin. Son 4 yıllık finansal verileri görüntüleyin, Excel veya Word olarak indirin.</p>
+    </div>
+  </main>
+</div>
+<script>
+let allCompanies=[];
+let currentId=null;
+let activeTab=null;
+
+async function init(){
+  await loadStats();
+  await loadCompanies();
+}
+
+async function loadStats(){
+  try{
+    const r=await fetch('/api/stats');
+    const s=await r.json();
+    document.getElementById('stat-companies').textContent=`🏢 ${s.companies} Şirket`;
+    document.getElementById('stat-records').textContent=`📋 ${(s.financials||0).toLocaleString('tr')} Kayıt`;
+    if(s.last_update){
+      const d=new Date(s.last_update);
+      document.getElementById('stat-updated').textContent=`Son güncelleme: ${d.toLocaleDateString('tr-TR')}`;
+    }
+  }catch(e){}
+}
+
+async function loadCompanies(){
+  try{
+    const r=await fetch('/api/companies');
+    allCompanies=await r.json();
+    renderList(allCompanies);
+  }catch(e){
+    document.getElementById('company-list').innerHTML='<div class="no-data">Veri yok.<br>Önce scraper çalıştırın.</div>';
+  }
+}
+
+function renderList(list){
+  document.getElementById('list-count').textContent=`${list.length} şirket`;
+  const el=document.getElementById('company-list');
+  if(!list.length){el.innerHTML='<div class="no-data">Sonuç yok</div>';return;}
+  el.innerHTML=list.map(c=>`
+    <div class="company-item ${c.id===currentId?'active':''}" onclick="selectCompany('${c.id}','${esc(c.code)}','${esc(c.title)}')">
+      <span class="badge">${c.code||'—'}</span>
+      <span class="company-name">${esc(c.title)}</span>
+      <span class="company-years">${c.year_count||0}y</span>
+    </div>`).join('');
+}
+
+function filterCompanies(){
+  const q=document.getElementById('search').value.toLowerCase();
+  renderList(q?allCompanies.filter(c=>(c.code||'').toLowerCase().includes(q)||(c.title||'').toLowerCase().includes(q)):allCompanies);
+}
+
+async function selectCompany(id,code,title){
+  currentId=id;
+  document.querySelectorAll('.company-item').forEach(el=>el.classList.toggle('active',el.querySelector('.badge')?.textContent===code));
+  document.getElementById('main').innerHTML=`<div class="loading"><div class="spinner"></div> <span>${esc(title)} yükleniyor...</span></div>`;
+  try{
+    const r=await fetch(`/api/financial/${id}`);
+    if(!r.ok)throw new Error();
+    renderCompany(await r.json());
+  }catch(e){
+    document.getElementById('main').innerHTML='<div class="no-data">⚠️ Bu şirket için veri yok.</div>';
+  }
+}
+
+function renderCompany(data){
+  const {company:c,years,tables}=data;
+  const keys=Object.keys(tables);
+  if(!activeTab||!keys.includes(activeTab))activeTab=keys[0]||null;
+  document.getElementById('main').innerHTML=`
+    <div class="company-header">
+      <div class="company-header-code">${esc(c.code||'—')}</div>
+      <div class="company-header-info">
+        <h2>${esc(c.title)}</h2>
+        <p>Son ${years.length} yıl · ${years.join(', ')}</p>
+      </div>
+      <div class="download-btns">
+        <a class="btn btn-kap" href="https://kap.org.tr/tr/sirket-finansal-bilgileri/${c.id}" target="_blank">🔗 KAP</a>
+        <a class="btn btn-excel" href="/download/${c.id}/excel">📥 Excel</a>
+        <a class="btn btn-word" href="/download/${c.id}/word">📄 Word</a>
+      </div>
+    </div>
+    ${keys.length>1?`<div class="tabs">${keys.map(k=>`<button class="tab ${k===activeTab?'active':''}" onclick="switchTab('${k}',this,${JSON.stringify(data).replace(/</g,'\\u003c')})">${tabLabel(k)}</button>`).join('')}</div>`:''}
+    <div id="tab-content">${activeTab?renderTable(activeTab,tables[activeTab],years):'<div class="no-data">Veri yok</div>'}</div>`;
+}
+
+function switchTab(key,btn,data){
+  activeTab=key;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-content').innerHTML=renderTable(key,data.tables[key],data.years);
+}
+
+function renderTable(type,data,years){
+  const entries=Object.entries(data).sort((a,b)=>a[0].localeCompare(b[0],'tr'));
+  if(!entries.length)return'<div class="no-data">Bu tabloda veri yok</div>';
+  return`<div class="table-card">
+    <div class="table-card-header">${tabIcon(type)} ${tabLabel(type)}<span style="margin-left:auto;font-size:11px;color:#6b7280;font-weight:400">Bin TL</span></div>
+    <div style="overflow-x:auto">
+    <table class="financial-table">
+      <thead><tr><th>Kalem</th>${years.map(y=>`<th>${y}</th>`).join('')}</tr></thead>
+      <tbody>${entries.map(([label,yv])=>`<tr><td>${esc(label)}</td>${​​​​​​​​​​​​​​​​
