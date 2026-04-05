@@ -18,7 +18,6 @@ from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-DB_PATH = os.environ.get("DB_PATH", "kap_data.db")
 app = Flask(__name__)
 
 def get_db():
