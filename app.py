@@ -1,3 +1,13 @@
+import urllib.request
+import os
+
+DB_URL = "https://github.com/ik1903846-web/kap-tarayici/raw/main/kap_data.db"
+DB_PATH = os.environ.get("DB_PATH", "kap_data.db")
+
+if not os.path.exists(DB_PATH):
+    print("Veritabanı indiriliyor...")
+    urllib.request.urlretrieve(DB_URL, DB_PATH)
+    print("Veritabanı indirildi!")
 from flask import Flask, render_template, jsonify, send_file, abort
 import sqlite3
 import os
