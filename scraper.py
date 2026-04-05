@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-DB_PATH = "kap_data.db"
+DB_PATH = os.environ.get("DB_PATH", "kap_data.db")
 BASE_URL = "https://kap.org.tr"
 
 HEADERS = {
